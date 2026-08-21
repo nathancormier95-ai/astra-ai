@@ -41,6 +41,7 @@ function ModeSelector({ modeId, onChange }: { modeId: string; onChange: (mode: A
       data={ASSISTANT_MODES}
       keyExtractor={(mode) => mode.id}
       showsHorizontalScrollIndicator={false}
+      style={styles.modeScroll}
       contentContainerStyle={styles.modeList}
       renderItem={({ item: mode }) => {
         const isSelected = mode.id === modeId;
@@ -313,6 +314,7 @@ const styles = StyleSheet.create({
   messages: { flexGrow: 1, justifyContent: "flex-end", paddingTop: 20, paddingBottom: 12 },
   modeList: { paddingHorizontal: 20, paddingVertical: 10 },
   modePill: { minHeight: 36 },
+  modeScroll: { flexGrow: 0, height: 56 },
   newButton: { shadowColor: "#6D5EF6", shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 },
   pressed: { opacity: 0.75, transform: [{ scale: 0.98 }] },
   sendButton: { minWidth: 40 },
