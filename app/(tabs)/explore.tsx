@@ -16,7 +16,7 @@ export default function ExploreScreen() {
     const conversations = await loadConversations();
     await saveConversations([conversation, ...conversations]);
     await setActiveConversationId(conversation.id);
-    router.navigate("/");
+    router.navigate("/chat");
   };
 
   return (

@@ -32,8 +32,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Assistant",
+          title: "Home",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Assistant",
+          tabBarIcon: ({ color }) => <IconSymbol size={25} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -44,19 +51,21 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="projects"
         options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => <IconSymbol size={26} name="safari.fill" color={color} />,
+          title: "Projects",
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="folder.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="account"
         options={{
-          title: "Settings",
+          title: "Account",
           tabBarIcon: ({ color }) => <IconSymbol size={26} name="gearshape.fill" color={color} />,
         }}
       />
+      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );
 }

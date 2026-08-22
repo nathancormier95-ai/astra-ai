@@ -17,6 +17,7 @@ const MAPPING = {
   "house.fill": "home",
   "clock.fill": "history",
   "safari.fill": "explore",
+  "folder.fill": "folder",
   "gearshape.fill": "settings",
   "paperplane.fill": "send",
   "chevron.left.forwardslash.chevron.right": "code",

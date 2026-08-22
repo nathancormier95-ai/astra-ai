@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -11,6 +11,8 @@ import {
   setActiveConversationId,
 } from "@/lib/astra-storage";
 import { haptic } from "@/lib/haptics";
+import { useAuth } from "@/hooks/use-auth";
+import { trpc } from "@/lib/trpc";
 
 function formatUpdatedAt(value: string): string {
   const date = new Date(value);
@@ -25,6 +27,8 @@ function formatUpdatedAt(value: string): string {
 export default function LibraryScreen() {
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { isAuthenticated } = useAuth();
+  const cloudConversationsQuery = trpc.workspace.conversations.list.useQuery(undefined, { enabled: isAuthenticated });
 
   const refresh = useCallback(async () => {
     setConversations(await loadConversations());
@@ -36,10 +40,33 @@ export default function LibraryScreen() {
     }, [refresh]),
   );
 
+  useEffect(() => {
+    if (!isAuthenticated || !cloudConversationsQuery.data?.length) return;
+    const cloudConversations: Conversation[] = cloudConversationsQuery.data.flatMap((item) => {
+      try {
+        const messages = JSON.parse(item.messagesJson) as Conversation["messages"];
+        if (!Array.isArray(messages)) return [];
+        return [{
+          id: item.id,
+          title: item.title,
+          modeId: item.modeId as Conversation["modeId"],
+          messages,
+          updatedAt: item.updatedAt.toISOString(),
+        }];
+      } catch {
+        return [];
+      }
+    });
+    if (cloudConversations.length) {
+      setConversations(cloudConversations);
+      void saveConversations(cloudConversations);
+    }
+  }, [cloudConversationsQuery.data, isAuthenticated]);
+
   const openConversation = async (conversation: Conversation) => {
     haptic.light();
     await setActiveConversationId(conversation.id);
-    router.navigate("/");
+    router.navigate("/chat");
   };
 
   const startNewConversation = async () => {
@@ -47,7 +74,7 @@ export default function LibraryScreen() {
     const conversation = createConversation(DEFAULT_MODE);
     await saveConversations([conversation, ...conversations]);
     await setActiveConversationId(conversation.id);
-    router.navigate("/");
+    router.navigate("/chat");
   };
 
   const confirmDelete = (conversation: Conversation) => {

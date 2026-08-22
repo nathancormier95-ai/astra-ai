@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, index, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -25,4 +25,73 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+export const workspacePreferences = mysqlTable("workspacePreferences", {
+  userId: int("userId").primaryKey(),
+  plan: mysqlEnum("plan", ["free", "premium"]).default("free").notNull(),
+  retention: mysqlEnum("retention", ["until_deleted"]).default("until_deleted").notNull(),
+  allowAiTraining: boolean("allowAiTraining").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const projects = mysqlTable(
+  "projects",
+  {
+    id: varchar("id", { length: 64 }).primaryKey(),
+    userId: int("userId").notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    description: text("description"),
+    color: varchar("color", { length: 16 }).default("violet").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index("projects_user_updated_idx").on(table.userId, table.updatedAt)],
+);
+
+export const savedConversations = mysqlTable(
+  "savedConversations",
+  {
+    id: varchar("id", { length: 64 }).primaryKey(),
+    userId: int("userId").notNull(),
+    projectId: varchar("projectId", { length: 64 }),
+    title: varchar("title", { length: 160 }).notNull(),
+    modeId: varchar("modeId", { length: 48 }).default("general").notNull(),
+    modelId: varchar("modelId", { length: 120 }).default("gpt-5-mini").notNull(),
+    messagesJson: text("messagesJson").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index("conversations_user_updated_idx").on(table.userId, table.updatedAt)],
+);
+
+export const uploadedDocuments = mysqlTable(
+  "uploadedDocuments",
+  {
+    id: varchar("id", { length: 64 }).primaryKey(),
+    userId: int("userId").notNull(),
+    projectId: varchar("projectId", { length: 64 }),
+    name: varchar("name", { length: 255 }).notNull(),
+    mimeType: varchar("mimeType", { length: 120 }).notNull(),
+    byteSize: int("byteSize").notNull(),
+    storageKey: varchar("storageKey", { length: 512 }).notNull(),
+    storageUrl: text("storageUrl").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => [index("documents_user_created_idx").on(table.userId, table.createdAt)],
+);
+
+export const usageEvents = mysqlTable(
+  "usageEvents",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    action: mysqlEnum("action", ["chat", "image", "document", "voice"]).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => [index("usage_user_action_created_idx").on(table.userId, table.action, table.createdAt)],
+);
+
+export type WorkspacePreference = typeof workspacePreferences.$inferSelect;
+export type Project = typeof projects.$inferSelect;
+export type SavedConversation = typeof savedConversations.$inferSelect;
+export type UploadedDocument = typeof uploadedDocuments.$inferSelect;

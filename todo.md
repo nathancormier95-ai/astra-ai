@@ -12,3 +12,9 @@
 - [x] Constrain the horizontal assistant mode selector to a compact mobile height.
 - [x] Commit and push the completed project to the selected GitHub repository.
 - [x] Rename the user-facing application branding from Astra to OmniMind.
+- [x] Define the privacy policy, retention controls, access model, and first-release product boundaries.
+- [x] Add authenticated accounts, account deletion, and privacy controls.
+- [x] Add dashboard, projects, persistent conversations, plan-aware usage limits, and subscription-plan presentation.
+- [x] Add a Premium plan with transparent capabilities and access controls, without payment processing in the initial release.
+- [x] Add secure model selection, document upload and questions, image generation, code mode, and basic voice input.
+- [x] Validate the expanded workspace flows, permissions, and data-retention behavior.
