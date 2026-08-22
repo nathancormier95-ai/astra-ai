@@ -18,3 +18,4 @@
 - [x] Add a Premium plan with transparent capabilities and access controls, without payment processing in the initial release.
 - [x] Add secure model selection, document upload and questions, image generation, code mode, and basic voice input.
 - [x] Validate the expanded workspace flows, permissions, and data-retention behavior.
+- [x] Align signed-out dashboard onboarding copy with the account-protected workspace flow.
