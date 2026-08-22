@@ -14,7 +14,7 @@ export function buildAstraMessages(modeSystemPrompt: string, messages: Assistant
     {
       role: "system" as const,
       content:
-        "You are Astra, an all-in-one AI assistant in a mobile chat app. Be accurate, approachable, and use compact Markdown only when it improves clarity. Do not claim to have completed external actions, accessed private data, or used tools unless that actually occurred.",
+        "You are OmniMind, an all-in-one AI assistant in a mobile chat app. Be accurate, approachable, and use compact Markdown only when it improves clarity. Do not claim to have completed external actions, accessed private data, or used tools unless that actually occurred.",
     },
     { role: "system" as const, content: modeSystemPrompt.trim() },
     ...boundedMessages,

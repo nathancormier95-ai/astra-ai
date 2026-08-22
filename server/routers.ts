@@ -44,7 +44,7 @@ export const appRouter = router({
         });
         const content = response.choices[0]?.message?.content;
         if (!content || typeof content !== "string") {
-          throw new Error("Astra did not return a usable response. Please try again.");
+          throw new Error("OmniMind did not return a usable response. Please try again.");
         }
         return { content: content.trim() };
       }),

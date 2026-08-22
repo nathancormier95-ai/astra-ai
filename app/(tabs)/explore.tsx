@@ -30,7 +30,7 @@ export default function ExploreScreen() {
           <View className="pt-3 pb-5">
             <Text className="text-3xl font-bold text-foreground">Explore</Text>
             <Text className="mt-1 text-sm leading-5 text-muted">
-              Choose a focused workspace for the way you want Astra to help.
+              Choose a focused workspace for the way you want OmniMind to help.
             </Text>
           </View>
         }

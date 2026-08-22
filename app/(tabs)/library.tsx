@@ -96,7 +96,7 @@ export default function LibraryScreen() {
             </View>
             <Text className="text-lg font-semibold text-foreground">No conversations yet</Text>
             <Text className="mt-2 text-center text-sm leading-5 text-muted">
-              Start a chat with Astra and it will be saved here on this device.
+              Start a chat with OmniMind and it will be saved here on this device.
             </Text>
             <TouchableOpacity
               className="mt-6 rounded-full bg-primary px-5 py-3"

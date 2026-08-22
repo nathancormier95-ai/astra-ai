@@ -131,7 +131,7 @@ export default function HomeScreen() {
       messages: [
         {
           ...conversation.messages[0],
-          content: `Hi, I’m Astra. You’re in ${nextMode.name} mode. What would you like to work on?`,
+          content: `Hi, I’m OmniMind. You’re in ${nextMode.name} mode. What would you like to work on?`,
         },
       ],
       updatedAt: new Date().toISOString(),
@@ -210,7 +210,7 @@ export default function HomeScreen() {
         <View className="flex-row items-center justify-between px-5 pt-3 pb-2">
           <View>
             <View className="flex-row items-center">
-              <Text className="text-3xl font-bold text-foreground">Astra</Text>
+              <Text className="text-3xl font-bold text-foreground">OmniMind</Text>
               <View className="ml-2 flex-row items-center rounded-full bg-success-light px-2 py-1">
                 <View className="mr-1 h-1.5 w-1.5 rounded-full bg-success" />
                 <Text className="text-xs font-semibold text-success">Online</Text>
@@ -253,7 +253,7 @@ export default function HomeScreen() {
               <View className="mb-4 items-start">
                 <View className="flex-row items-center rounded-3xl rounded-bl-md border border-border bg-surface px-4 py-3">
                   <ActivityIndicator size="small" color="#6D5EF6" />
-                  <Text className="ml-2 text-sm font-medium text-muted">Astra is thinking…</Text>
+                  <Text className="ml-2 text-sm font-medium text-muted">OmniMind is thinking…</Text>
                 </View>
               </View>
             ) : null
@@ -285,7 +285,7 @@ export default function HomeScreen() {
               className="max-h-28 min-h-11 flex-1 px-2 py-2 text-base text-foreground"
               value={input}
               onChangeText={setInput}
-              placeholder={`Ask Astra in ${mode.name} mode…`}
+              placeholder={`Ask OmniMind in ${mode.name} mode…`}
               placeholderTextColor="#8B8A9E"
               multiline
               editable={!isThinking}
@@ -303,7 +303,7 @@ export default function HomeScreen() {
               <MaterialIcons name="arrow-upward" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
-          <Text className="pb-2 text-center text-xs text-muted">Astra can make mistakes. Verify important details.</Text>
+          <Text className="pb-2 text-center text-xs text-muted">OmniMind can make mistakes. Verify important details.</Text>
         </View>
       </KeyboardAvoidingView>
     </ScreenContainer>

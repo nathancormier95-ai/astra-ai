@@ -1,8 +1,8 @@
-# Astra Mobile Design
+# OmniMind Mobile Design
 
 ## Product Intent
 
-Astra is an all-in-one AI chat assistant for quick everyday help. The portrait-first interface prioritizes a familiar messaging flow, clear mode selection, and compact controls that can be reached with one hand. The visual language follows iOS Human Interface Guidelines conventions—generous spacing, readable typography, obvious hierarchy, and a simple bottom tab bar—while remaining well suited to Android.
+OmniMind is an all-in-one AI chat assistant for quick everyday help. The portrait-first interface prioritizes a familiar messaging flow, clear mode selection, and compact controls that can be reached with one hand. The visual language follows iOS Human Interface Guidelines conventions—generous spacing, readable typography, obvious hierarchy, and a simple bottom tab bar—while remaining well suited to Android.
 
 ## Screen List
 

@@ -41,7 +41,7 @@ export default function SettingsScreen() {
     <ScreenContainer className="px-5" containerClassName="bg-background">
       <View className="pt-3 pb-6">
         <Text className="text-3xl font-bold text-foreground">Settings</Text>
-        <Text className="mt-1 text-sm text-muted">Control your Astra experience</Text>
+        <Text className="mt-1 text-sm text-muted">Control your OmniMind experience</Text>
       </View>
 
       <Text className="mb-2 ml-1 text-xs font-bold uppercase tracking-wider text-muted">Experience</Text>
@@ -102,7 +102,7 @@ export default function SettingsScreen() {
         <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary">
           <Text className="text-xl font-bold text-white">A</Text>
         </View>
-        <Text className="mt-3 text-sm font-semibold text-foreground">Astra AI Assistant</Text>
+        <Text className="mt-3 text-sm font-semibold text-foreground">OmniMind</Text>
         <Text className="mt-1 text-xs text-muted">Version 1.0.0</Text>
       </View>
     </ScreenContainer>

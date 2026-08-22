@@ -11,3 +11,4 @@
 - [x] Add automated tests for core chat behavior and validate TypeScript checks.
 - [x] Constrain the horizontal assistant mode selector to a compact mobile height.
 - [x] Commit and push the completed project to the selected GitHub repository.
+- [x] Rename the user-facing application branding from Astra to OmniMind.

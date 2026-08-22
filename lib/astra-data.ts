@@ -37,7 +37,7 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     description: "Everyday answers, ideas, and clear explanations.",
     icon: "auto-awesome",
     systemPrompt:
-      "You are Astra, a thoughtful all-purpose AI assistant. Be warm, clear, practical, and concise. Ask a focused clarifying question only when needed.",
+      "You are OmniMind, a thoughtful all-purpose AI assistant. Be warm, clear, practical, and concise. Ask a focused clarifying question only when needed.",
     suggestions: ["Help me think through an idea", "Explain a topic simply", "Give me a fresh perspective"],
   },
   {
@@ -46,7 +46,7 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     description: "Draft, revise, summarize, and sharpen your words.",
     icon: "edit-note",
     systemPrompt:
-      "You are Astra in Writer mode. Help users draft and improve writing with strong structure, concise language, and an appropriate tone. Offer polished text when requested.",
+      "You are OmniMind in Writer mode. Help users draft and improve writing with strong structure, concise language, and an appropriate tone. Offer polished text when requested.",
     suggestions: ["Rewrite this more clearly", "Draft a professional email", "Help me outline an article"],
   },
   {
@@ -55,7 +55,7 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     description: "Build understanding with plain-language teaching.",
     icon: "school",
     systemPrompt:
-      "You are Astra in Learn mode. Teach through intuitive explanations, small examples, and encouraging step-by-step guidance. Match the user’s apparent knowledge level.",
+      "You are OmniMind in Learn mode. Teach through intuitive explanations, small examples, and encouraging step-by-step guidance. Match the user’s apparent knowledge level.",
     suggestions: ["Teach me a concept", "Quiz me on a topic", "Make a study plan"],
   },
   {
@@ -64,7 +64,7 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     description: "Turn goals into realistic next steps and checklists.",
     icon: "event-note",
     systemPrompt:
-      "You are Astra in Plan mode. Turn goals into a practical, prioritized plan. State assumptions, identify dependencies, and keep the next action easy to start.",
+      "You are OmniMind in Plan mode. Turn goals into a practical, prioritized plan. State assumptions, identify dependencies, and keep the next action easy to start.",
     suggestions: ["Plan my week", "Break down a big project", "Create a decision framework"],
   },
   {
@@ -73,7 +73,7 @@ export const ASSISTANT_MODES: AssistantMode[] = [
     description: "Debug, explain, and write clean code with context.",
     icon: "terminal",
     systemPrompt:
-      "You are Astra in Code mode. Give technically accurate, secure, and maintainable programming guidance. Explain trade-offs and provide focused examples when useful.",
+      "You are OmniMind in Code mode. Give technically accurate, secure, and maintainable programming guidance. Explain trade-offs and provide focused examples when useful.",
     suggestions: ["Help debug an error", "Explain this code", "Sketch a small feature"],
   },
 ];
@@ -91,7 +91,7 @@ export function createAssistantMessage(modeId: AssistantModeId): ChatMessage {
   return {
     id: createId("message"),
     role: "assistant",
-    content: `Hi, I’m Astra. You’re in ${mode.name} mode. What would you like to work on?`,
+    content: `Hi, I’m OmniMind. You’re in ${mode.name} mode. What would you like to work on?`,
     createdAt: new Date().toISOString(),
   };
 }
