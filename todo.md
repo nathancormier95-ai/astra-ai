@@ -31,3 +31,6 @@
 - [x] Restore a clear sign-in path for legacy chat clients and replace generic chat failures with actionable error messages.
 - [x] Make the Stripe-backed Subscribe for $6/month action prominent and explicit in the OmniMind account experience.
 - [x] Add a clear Premium feature list immediately above the $6/month Subscribe action.
+- [x] Add guided quick actions for writing, rewriting, translating, summarizing, brainstorming, study support, and marketing copy.
+- [x] Add basic text-to-speech playback for OmniMind assistant replies.
+- [x] Validate the added quick tools and reply playback controls.
