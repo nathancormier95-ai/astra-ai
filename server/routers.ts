@@ -251,6 +251,17 @@ export const appRouter = router({
         }),
       delete: protectedProcedure.input(z.object({ documentId: z.string().uuid() })).mutation(({ ctx, input }) => db.deleteDocument(ctx.user.id, input.documentId)),
     }),
+    flashcards: router({
+      list: protectedProcedure
+        .input(z.object({ projectId: z.string().uuid().optional() }).optional())
+        .query(({ ctx, input }) => db.listFlashcardSets(ctx.user.id, input?.projectId)),
+      save: protectedProcedure
+        .input(z.object({ projectId: z.string().uuid(), sourceConversationId: z.string().trim().min(1).max(64).nullable().optional(), title: z.string().trim().min(1).max(160), cards: z.array(flashcardSchema).min(3).max(8) }))
+        .mutation(({ ctx, input }) => db.createFlashcardSet(ctx.user.id, { projectId: input.projectId, sourceConversationId: input.sourceConversationId, title: input.title, cardsJson: JSON.stringify(input.cards) })),
+      delete: protectedProcedure
+        .input(z.object({ flashcardSetId: z.string().uuid() }))
+        .mutation(({ ctx, input }) => db.deleteFlashcardSet(ctx.user.id, input.flashcardSetId)),
+    }),
     deleteAccountData: protectedProcedure.mutation(async ({ ctx }) => {
       await db.deleteAccountData(ctx.user.id);
       return { deleted: true };

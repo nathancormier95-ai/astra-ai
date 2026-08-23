@@ -84,6 +84,21 @@ export const uploadedDocuments = mysqlTable(
   (table) => [index("documents_user_created_idx").on(table.userId, table.createdAt)],
 );
 
+export const flashcardSets = mysqlTable(
+  "flashcardSets",
+  {
+    id: varchar("id", { length: 64 }).primaryKey(),
+    userId: int("userId").notNull(),
+    projectId: varchar("projectId", { length: 64 }).notNull(),
+    sourceConversationId: varchar("sourceConversationId", { length: 64 }),
+    title: varchar("title", { length: 160 }).notNull(),
+    cardsJson: text("cardsJson").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index("flashcards_user_project_updated_idx").on(table.userId, table.projectId, table.updatedAt)],
+);
+
 export const usageEvents = mysqlTable(
   "usageEvents",
   {
@@ -99,3 +114,4 @@ export type WorkspacePreference = typeof workspacePreferences.$inferSelect;
 export type Project = typeof projects.$inferSelect;
 export type SavedConversation = typeof savedConversations.$inferSelect;
 export type UploadedDocument = typeof uploadedDocuments.$inferSelect;
+export type FlashcardSet = typeof flashcardSets.$inferSelect;

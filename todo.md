@@ -36,3 +36,7 @@
 - [x] Validate the added quick tools and reply playback controls.
 - [x] Add flashcard-set generation from assistant responses with local review and sharing controls.
 - [x] Validate the flashcard learning flow.
+- [ ] Add secure project-scoped flashcard-set storage and retrieval.
+- [ ] Add mobile controls to save generated flashcards and review saved project flashcard sets.
+- [ ] Validate project flashcard persistence and ownership boundaries.
+- [x] Diagnose and fix the Android startup crash reported for OmniMind version 1.05.

@@ -22,6 +22,13 @@
       "when": 1787447860686,
       "tag": "0002_silly_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1787456447973,
+      "tag": "0003_cold_ender_wiggin",
+      "breakpoints": true
     }
   ]
 }

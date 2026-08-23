@@ -2,6 +2,7 @@ import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 
 import {
+  flashcardSets,
   projects,
   savedConversations,
   uploadedDocuments,
@@ -219,6 +220,7 @@ export async function deleteProject(userId: number, projectId: string) {
     .update(uploadedDocuments)
     .set({ projectId: null })
     .where(and(eq(uploadedDocuments.userId, userId), eq(uploadedDocuments.projectId, projectId)));
+  await db.delete(flashcardSets).where(and(eq(flashcardSets.userId, userId), eq(flashcardSets.projectId, projectId)));
   await db.delete(projects).where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
 }
 
@@ -232,6 +234,42 @@ export async function assertProjectOwnership(userId: number, projectId: string |
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
     .limit(1);
   if (!result[0]) throw new Error("Project not found or access denied");
+}
+
+export async function createFlashcardSet(
+  userId: number,
+  input: { projectId: string; sourceConversationId?: string | null; title: string; cardsJson: string },
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Workspace database is unavailable");
+  await assertProjectOwnership(userId, input.projectId);
+  const id = crypto.randomUUID();
+  await db.insert(flashcardSets).values({
+    id,
+    userId,
+    projectId: input.projectId,
+    sourceConversationId: input.sourceConversationId ?? null,
+    title: input.title,
+    cardsJson: input.cardsJson,
+  });
+  return { id, ...input };
+}
+
+export async function listFlashcardSets(userId: number, projectId?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  if (projectId) await assertProjectOwnership(userId, projectId);
+  return db
+    .select()
+    .from(flashcardSets)
+    .where(projectId ? and(eq(flashcardSets.userId, userId), eq(flashcardSets.projectId, projectId)) : eq(flashcardSets.userId, userId))
+    .orderBy(desc(flashcardSets.updatedAt));
+}
+
+export async function deleteFlashcardSet(userId: number, flashcardSetId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Workspace database is unavailable");
+  await db.delete(flashcardSets).where(and(eq(flashcardSets.id, flashcardSetId), eq(flashcardSets.userId, userId)));
 }
 
 export async function listConversations(userId: number) {
