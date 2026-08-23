@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useAuth } from "@/hooks/use-auth";
@@ -32,10 +34,42 @@ export default function AccountScreen() {
   const usageQuery = trpc.workspace.usage.useQuery(undefined, { enabled: isAuthenticated });
   const updatePrivacyMutation = trpc.workspace.updatePrivacy.useMutation({ onSuccess: () => preferencesQuery.refetch() });
   const deleteAccountMutation = trpc.workspace.deleteAccountData.useMutation();
+  const billingStatusQuery = trpc.billing.status.useQuery(undefined, { enabled: isAuthenticated });
+  const billingPlanQuery = trpc.billing.plan.useQuery();
+  const checkoutMutation = trpc.billing.checkout.useMutation();
+  const portalMutation = trpc.billing.portal.useMutation();
 
   const beginSignIn = async () => {
     haptic.light();
     await startOAuthLogin();
+  };
+
+  const openCheckout = async () => {
+    try {
+      haptic.light();
+      const returnUrl = Linking.createURL("account");
+      const result = await checkoutMutation.mutateAsync({ returnUrl });
+      await WebBrowser.openBrowserAsync(result.url);
+      await billingStatusQuery.refetch();
+      await usageQuery.refetch();
+    } catch (error) {
+      haptic.error();
+      Alert.alert("Checkout unavailable", error instanceof Error ? error.message : "Please try again shortly.");
+    }
+  };
+
+  const openBillingPortal = async () => {
+    try {
+      haptic.light();
+      const returnUrl = Linking.createURL("account");
+      const result = await portalMutation.mutateAsync({ returnUrl });
+      await WebBrowser.openBrowserAsync(result.url);
+      await billingStatusQuery.refetch();
+      await usageQuery.refetch();
+    } catch (error) {
+      haptic.error();
+      Alert.alert("Subscription management unavailable", error instanceof Error ? error.message : "Please try again shortly.");
+    }
   };
 
   const confirmDeleteData = useCallback(() => {
@@ -98,7 +132,7 @@ export default function AccountScreen() {
     );
   }
 
-  const plan = usageQuery.data?.plan ?? "free";
+  const plan = billingStatusQuery.data?.plan ?? usageQuery.data?.plan ?? "free";
   const usage = usageQuery.data?.actions;
   const displayName = user?.name || user?.email || "OmniMind member";
   const allowAiTraining = preferencesQuery.data?.allowAiTraining ?? false;
@@ -150,7 +184,15 @@ export default function AccountScreen() {
               <Text className="mt-1 text-sm leading-5 text-muted">Premium adds larger monthly allowances plus Reason and Visual model access.</Text>
             </View>
           </View>
-          <Text className="mt-4 text-xs leading-4 text-muted">Billing is intentionally not enabled in this first release. Plan benefits are visible and enforced, while payment processing is added only after the core workspace is stable.</Text>
+          <View className="mt-5 rounded-2xl bg-primary-light p-4">
+            <View className="flex-row items-baseline justify-between"><Text className="text-xl font-bold text-foreground">{billingPlanQuery.data ? `$${(billingPlanQuery.data.amountCents / 100).toFixed(0)}` : "$6"}<Text className="text-sm font-medium text-muted"> / month</Text></Text><Text className="text-xs font-semibold text-primary">Cancel anytime</Text></View>
+            <Text className="mt-2 text-xs leading-4 text-muted">Payment details are collected by Stripe’s hosted checkout. OmniMind does not store your card details.</Text>
+          </View>
+          {plan === "premium" ? (
+            <TouchableOpacity className="mt-4 items-center rounded-full border border-primary py-3" onPress={() => void openBillingPortal()} activeOpacity={0.75}><Text className="font-semibold text-primary">Manage subscription</Text></TouchableOpacity>
+          ) : (
+            <TouchableOpacity className="mt-4 items-center rounded-full bg-primary py-3" onPress={() => void openCheckout()} activeOpacity={0.75}><Text className="font-semibold text-white">Upgrade to Premium</Text></TouchableOpacity>
+          )}
         </View>
 
         <Text className="mb-2 mt-7 ml-1 text-xs font-bold uppercase tracking-wider text-muted">Privacy</Text>

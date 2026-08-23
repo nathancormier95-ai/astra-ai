@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { stripeWebhookHandler } from "../billing";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -52,6 +53,7 @@ async function startServer() {
     next();
   });
 
+  app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhookHandler);
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 

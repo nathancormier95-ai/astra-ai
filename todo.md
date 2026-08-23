@@ -19,3 +19,13 @@
 - [x] Add secure model selection, document upload and questions, image generation, code mode, and basic voice input.
 - [x] Validate the expanded workspace flows, permissions, and data-retention behavior.
 - [x] Align signed-out dashboard onboarding copy with the account-protected workspace flow.
+- [ ] Define Stripe subscription pricing, entitlement, webhook, and data-handling requirements.
+- [ ] Apply the confirmed $6/month Premium price to OmniMind’s account and Stripe checkout configuration.
+- [ ] Add secure server-side Stripe checkout, subscription portal, and webhook entitlement processing.
+- [ ] Connect Premium purchase and subscription-management actions in the OmniMind account experience.
+- [ ] Validate Stripe integration configuration and Premium entitlement behavior.
+- [ ] Define consent, scopes, scan boundaries, retention, and deletion controls for user-authorized email and social profiles.
+- [ ] Add connected email and social profile records with user-controlled disconnect and data-deletion actions.
+- [ ] Build account screens for opt-in email and social scans with clear results and no background monitoring.
+- [ ] Validate connected-account authorization, ownership enforcement, and scan privacy boundaries.
+- [x] Restore a clear sign-in path for legacy chat clients and replace generic chat failures with actionable error messages.

@@ -1,6 +1,6 @@
 import { COOKIE_NAME } from "../shared/const.js";
 import { z } from "zod";
-import { getMode, type AssistantModeId } from "../lib/astra-data";
+import { ASSISTANT_MODES, getMode, type AssistantModeId } from "../lib/astra-data";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { invokeLLM } from "./_core/llm";
 import { generateImage } from "./_core/imageGeneration";
@@ -10,6 +10,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { buildAstraMessages, getOmniMindModel, OMNIMIND_MODELS } from "./astra";
 import * as db from "./db";
 import { storageGetSignedUrl, storagePut } from "./storage";
+import { createBillingPortalSession, createCheckoutSession, getStripe, PREMIUM_PRICE_CENTS, PREMIUM_PRICE_LABEL } from "./billing";
 
 const assistantModeSchema = z.enum(["general", "writer", "learn", "plan", "code"]);
 const modelIdSchema = z.enum(["gpt-5-mini", "gpt-5", "gemini-3-flash-preview"]);
@@ -19,6 +20,16 @@ const messageSchema = z.object({
 });
 const supportedDocumentTypes = ["application/pdf", "text/plain", "text/markdown", "text/csv"] as const;
 const documentMimeSchema = z.enum(supportedDocumentTypes);
+const secureChatSchema = z.object({
+  modeId: assistantModeSchema,
+  modelId: modelIdSchema.default("gpt-5-mini"),
+  messages: z.array(messageSchema).min(1).max(16),
+});
+const legacyChatSchema = z.object({
+  modeSystemPrompt: z.string().trim().min(20).max(1_500),
+  messages: z.array(messageSchema).min(1).max(16),
+});
+const legacyChatAttempts = new Map<string, { count: number; windowStartedAt: number }>();
 
 function requireUsage(usage: { allowed: boolean; action: string; actions: Record<string, { limit: number }> }) {
   if (!usage.allowed) {
@@ -34,6 +45,29 @@ function sanitizeFilename(name: string) {
 function decodeBase64(value: string) {
   const raw = value.includes(",") ? value.split(",").at(-1) ?? "" : value;
   return Buffer.from(raw, "base64");
+}
+
+function getLegacyClientKey(req: { headers: Record<string, string | string[] | undefined>; socket: { remoteAddress?: string } }) {
+  const forwarded = req.headers["x-forwarded-for"];
+  return (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+}
+
+function enforceLegacyChatLimit(req: { headers: Record<string, string | string[] | undefined>; socket: { remoteAddress?: string } }) {
+  const now = Date.now();
+  const key = getLegacyClientKey(req);
+  const current = legacyChatAttempts.get(key);
+  if (!current || now - current.windowStartedAt >= 60 * 60 * 1_000) {
+    legacyChatAttempts.set(key, { count: 1, windowStartedAt: now });
+    return;
+  }
+  if (current.count >= 8) {
+    throw new Error("Legacy guest chat is temporarily limited. Update to OmniMind and sign in for your private workspace.");
+  }
+  current.count += 1;
+}
+
+function trustedLegacyModePrompt(clientPrompt: string) {
+  return ASSISTANT_MODES.find((mode) => mode.systemPrompt === clientPrompt)?.systemPrompt ?? getMode("general").systemPrompt;
 }
 
 export const appRouter = router({
@@ -56,15 +90,21 @@ export const appRouter = router({
       const plan = preferences?.plan ?? "free";
       return OMNIMIND_MODELS.map((model) => ({ ...model, available: model.plan === "free" || plan === "premium" }));
     }),
-    chat: protectedProcedure
-      .input(
-        z.object({
-          modeId: assistantModeSchema,
-          modelId: modelIdSchema.default("gpt-5-mini"),
-          messages: z.array(messageSchema).min(1).max(16),
-        }),
-      )
+    chat: publicProcedure
+      .input(z.union([secureChatSchema, legacyChatSchema]))
       .mutation(async ({ ctx, input }) => {
+        if ("modeSystemPrompt" in input) {
+          enforceLegacyChatLimit(ctx.req);
+          const response = await invokeLLM({
+            model: "gpt-5-mini",
+            maxTokens: 700,
+            messages: buildAstraMessages(trustedLegacyModePrompt(input.modeSystemPrompt), input.messages),
+          });
+          const content = response.choices[0]?.message?.content;
+          if (!content || typeof content !== "string") throw new Error("Astra could not return a response. Please try again.");
+          return { content: content.trim(), legacy: true };
+        }
+        if (!ctx.user) throw new Error("Sign in to OmniMind to use your private AI workspace.");
         const preferences = await db.getPreferences(ctx.user.id);
         const selectedModel = getOmniMindModel(input.modelId);
         if (!selectedModel || (selectedModel.plan === "premium" && preferences?.plan !== "premium")) {
@@ -180,6 +220,29 @@ export const appRouter = router({
     deleteAccountData: protectedProcedure.mutation(async ({ ctx }) => {
       await db.deleteAccountData(ctx.user.id);
       return { deleted: true };
+    }),
+  }),
+
+  billing: router({
+    status: protectedProcedure.query(({ ctx }) => db.getBillingStatus(ctx.user.id)),
+    plan: publicProcedure.query(() => ({ amountCents: PREMIUM_PRICE_CENTS, currency: "usd", interval: "month", label: PREMIUM_PRICE_LABEL })),
+    checkout: protectedProcedure
+      .input(z.object({ returnUrl: z.string().url().max(500) }))
+      .mutation(async ({ ctx, input }) => {
+        const status = await db.getBillingStatus(ctx.user.id);
+        if (status.plan === "premium" && status.canManageSubscription) throw new Error("Premium is already active. Use Manage subscription instead.");
+        return { url: await createCheckoutSession(ctx.user, input.returnUrl) };
+      }),
+    portal: protectedProcedure
+      .input(z.object({ returnUrl: z.string().url().max(500) }))
+      .mutation(async ({ ctx, input }) => ({ url: await createBillingPortalSession(ctx.user, input.returnUrl) })),
+    configured: protectedProcedure.query(() => {
+      try {
+        const stripe = getStripe();
+        return { ready: Boolean(stripe) };
+      } catch {
+        return { ready: false };
+      }
     }),
   }),
 

@@ -15,6 +15,13 @@
       "when": 1787368079414,
       "tag": "0001_lazy_the_professor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787447860686,
+      "tag": "0002_silly_ghost_rider",
+      "breakpoints": true
     }
   ]
 }

@@ -95,6 +95,57 @@ export async function updatePrivacyPreferences(
   return getPreferences(userId);
 }
 
+export async function setStripeCustomerId(userId: number, stripeCustomerId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Workspace database is unavailable");
+  await ensurePreferences(userId);
+  await db
+    .update(workspacePreferences)
+    .set({ stripeCustomerId })
+    .where(eq(workspacePreferences.userId, userId));
+}
+
+export async function getUserIdByStripeCustomerId(stripeCustomerId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select({ userId: workspacePreferences.userId })
+    .from(workspacePreferences)
+    .where(eq(workspacePreferences.stripeCustomerId, stripeCustomerId))
+    .limit(1);
+  return result[0]?.userId;
+}
+
+export async function updateStripeSubscription(
+  userId: number,
+  input: { stripeSubscriptionId: string | null; status: string | null; currentPeriodEnd: Date | null },
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Workspace database is unavailable");
+  await ensurePreferences(userId);
+  const isPremium = input.status === "active" || input.status === "trialing";
+  await db
+    .update(workspacePreferences)
+    .set({
+      plan: isPremium ? "premium" : "free",
+      stripeSubscriptionId: input.stripeSubscriptionId,
+      subscriptionStatus: input.status,
+      premiumCurrentPeriodEnd: input.currentPeriodEnd,
+    })
+    .where(eq(workspacePreferences.userId, userId));
+  return getPreferences(userId);
+}
+
+export async function getBillingStatus(userId: number) {
+  const preferences = await getPreferences(userId);
+  return {
+    plan: preferences?.plan ?? "free",
+    subscriptionStatus: preferences?.subscriptionStatus ?? null,
+    premiumCurrentPeriodEnd: preferences?.premiumCurrentPeriodEnd?.toISOString() ?? null,
+    canManageSubscription: Boolean(preferences?.stripeCustomerId),
+  };
+}
+
 export async function getUsageSummary(userId: number) {
   const db = await getDb();
   const preferences = await ensurePreferences(userId);

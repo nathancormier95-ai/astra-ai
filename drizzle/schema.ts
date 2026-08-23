@@ -28,6 +28,10 @@ export type InsertUser = typeof users.$inferInsert;
 export const workspacePreferences = mysqlTable("workspacePreferences", {
   userId: int("userId").primaryKey(),
   plan: mysqlEnum("plan", ["free", "premium"]).default("free").notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  subscriptionStatus: varchar("subscriptionStatus", { length: 40 }),
+  premiumCurrentPeriodEnd: timestamp("premiumCurrentPeriodEnd"),
   retention: mysqlEnum("retention", ["until_deleted"]).default("until_deleted").notNull(),
   allowAiTraining: boolean("allowAiTraining").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
