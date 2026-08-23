@@ -6,6 +6,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -50,6 +51,8 @@ import { trpc } from "@/lib/trpc";
 type ModelId = "gpt-5-mini" | "gpt-5" | "gemini-3-flash-preview";
 type AttachedDocument = { id: string; name: string };
 type QuickAction = { id: string; label: string; icon: string; prompt: string };
+type Flashcard = { question: string; answer: string };
+type FlashcardSet = { sourceMessageId: string; cards: Flashcard[] };
 const supportedDocumentTypes = ["application/pdf", "text/plain", "text/markdown", "text/csv"];
 const QUICK_ACTIONS: QuickAction[] = [
   { id: "write", label: "Write", icon: "edit-note", prompt: "Help me write a clear, engaging " },
@@ -110,6 +113,18 @@ function QuickActionSelector({ onSelect }: { onSelect: (action: QuickAction) => 
   );
 }
 
+function FlashcardDeck({ cards, activeIndex, onChange, onShare }: { cards: Flashcard[]; activeIndex: number; onChange: (index: number) => void; onShare: () => void }) {
+  const card = cards[activeIndex];
+  return (
+    <View className="mt-3 rounded-2xl border border-primary bg-primary-light p-3">
+      <View className="flex-row items-center justify-between"><Text className="text-xs font-bold uppercase tracking-wide text-primary">Study card {activeIndex + 1} of {cards.length}</Text><TouchableOpacity onPress={onShare} activeOpacity={0.7}><MaterialIcons name="share" size={18} color="#6D5EF6" /></TouchableOpacity></View>
+      <Text className="mt-2 text-sm font-semibold leading-5 text-foreground">{card.question}</Text>
+      <Text className="mt-2 text-sm leading-5 text-muted">{card.answer}</Text>
+      <View className="mt-3 flex-row justify-between"><TouchableOpacity disabled={activeIndex === 0} className={activeIndex === 0 ? "rounded-full bg-border px-3 py-1.5" : "rounded-full bg-surface px-3 py-1.5"} onPress={() => onChange(activeIndex - 1)} activeOpacity={0.7}><Text className={activeIndex === 0 ? "text-xs font-semibold text-muted" : "text-xs font-semibold text-primary"}>Previous</Text></TouchableOpacity><TouchableOpacity disabled={activeIndex === cards.length - 1} className={activeIndex === cards.length - 1 ? "rounded-full bg-border px-3 py-1.5" : "rounded-full bg-surface px-3 py-1.5"} onPress={() => onChange(activeIndex + 1)} activeOpacity={0.7}><Text className={activeIndex === cards.length - 1 ? "text-xs font-semibold text-muted" : "text-xs font-semibold text-primary"}>Next</Text></TouchableOpacity></View>
+    </View>
+  );
+}
+
 export default function ChatScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -122,6 +137,8 @@ export default function ChatScreen() {
   const [selectedModelId, setSelectedModelId] = useState<ModelId>("gpt-5-mini");
   const [attachedDocument, setAttachedDocument] = useState<AttachedDocument | null>(null);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+  const [flashcardSet, setFlashcardSet] = useState<FlashcardSet | null>(null);
+  const [activeFlashcardIndex, setActiveFlashcardIndex] = useState(0);
   const messageListRef = useRef<FlatList<ChatMessage>>(null);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
@@ -132,6 +149,7 @@ export default function ChatScreen() {
   const documentQuestionMutation = trpc.assistant.documentQuestion.useMutation();
   const imageMutation = trpc.assistant.image.useMutation();
   const transcribeMutation = trpc.assistant.transcribe.useMutation();
+  const flashcardMutation = trpc.assistant.flashcards.useMutation();
   const modelsQuery = trpc.assistant.models.useQuery(undefined, { enabled: isAuthenticated });
 
   const hydrate = useCallback(async () => {
@@ -228,6 +246,30 @@ export default function ChatScreen() {
       onStopped: () => setSpeakingMessageId(null),
       onError: () => setSpeakingMessageId(null),
     });
+  };
+
+  const createFlashcards = async (message: ChatMessage) => {
+    if (!requireAccount()) return;
+    try {
+      haptic.light(hapticsEnabled);
+      const result = await flashcardMutation.mutateAsync({ source: message.content });
+      setFlashcardSet({ sourceMessageId: message.id, cards: result.cards });
+      setActiveFlashcardIndex(0);
+      haptic.success(hapticsEnabled);
+    } catch (error) {
+      haptic.error(hapticsEnabled);
+      Alert.alert("Couldn’t make flashcards", error instanceof Error ? error.message : "Try a longer assistant response.");
+    }
+  };
+
+  const shareFlashcards = async () => {
+    if (!flashcardSet) return;
+    const content = flashcardSet.cards.map((card, index) => `${index + 1}. ${card.question}\n${card.answer}`).join("\n\n");
+    try {
+      await Share.share({ message: `OmniMind study cards\n\n${content}` });
+    } catch {
+      Alert.alert("Couldn’t open sharing", "Try again shortly.");
+    }
   };
 
   const chooseModel = (model: { id: ModelId; available: boolean; plan: "free" | "premium" }) => {
@@ -354,6 +396,22 @@ export default function ChatScreen() {
     }
   };
 
+  const renderMessage = ({ item: message }: { item: ChatMessage }) => (
+    <View className={message.role === "user" ? "mb-4 items-end" : "mb-4 items-start"}>
+      <View className={message.role === "user" ? "max-w-[88%] rounded-3xl rounded-br-md bg-primary px-4 py-3" : "max-w-[90%] rounded-3xl rounded-bl-md border border-border bg-surface px-4 py-3"}>
+        <Text className={message.role === "user" ? "text-base leading-6 text-white" : "text-base leading-6 text-foreground"}>{message.content}</Text>
+        {message.imageUrl ? <Image source={{ uri: message.imageUrl }} resizeMode="cover" style={styles.generatedImage} /> : null}
+        {message.role === "assistant" ? (
+          <View className="mt-3 flex-row gap-2">
+            <TouchableOpacity className="flex-row items-center rounded-full bg-primary-light px-2.5 py-1.5" onPress={() => void toggleReplySpeech(message)} activeOpacity={0.7}><MaterialIcons name={speakingMessageId === message.id ? "stop-circle" : "volume-up"} size={16} color="#6D5EF6" /><Text className="ml-1 text-xs font-semibold text-primary">{speakingMessageId === message.id ? "Stop" : "Listen"}</Text></TouchableOpacity>
+            <TouchableOpacity disabled={message.content.length < 80 || flashcardMutation.isPending} className={message.content.length < 80 ? "flex-row items-center rounded-full bg-border px-2.5 py-1.5" : "flex-row items-center rounded-full bg-primary-light px-2.5 py-1.5"} onPress={() => void createFlashcards(message)} activeOpacity={0.7}><MaterialIcons name="style" size={16} color="#6D5EF6" /><Text className="ml-1 text-xs font-semibold text-primary">Cards</Text></TouchableOpacity>
+          </View>
+        ) : null}
+        {flashcardSet?.sourceMessageId === message.id ? <FlashcardDeck cards={flashcardSet.cards} activeIndex={activeFlashcardIndex} onChange={setActiveFlashcardIndex} onShare={() => void shareFlashcards()} /> : null}
+      </View>
+    </View>
+  );
+
   if (isLoading || !conversation) {
     return <ScreenContainer className="items-center justify-center"><ActivityIndicator color="#6D5EF6" /></ScreenContainer>;
   }
@@ -391,7 +449,7 @@ export default function ChatScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.messages}
           onContentSizeChange={() => messageListRef.current?.scrollToEnd({ animated: true })}
-          renderItem={({ item: message }) => <View className={message.role === "user" ? "mb-4 items-end" : "mb-4 items-start"}><View className={message.role === "user" ? "max-w-[88%] rounded-3xl rounded-br-md bg-primary px-4 py-3" : "max-w-[90%] rounded-3xl rounded-bl-md border border-border bg-surface px-4 py-3"}><Text className={message.role === "user" ? "text-base leading-6 text-white" : "text-base leading-6 text-foreground"}>{message.content}</Text>{message.imageUrl ? <Image source={{ uri: message.imageUrl }} resizeMode="cover" style={styles.generatedImage} /> : null}{message.role === "assistant" ? <TouchableOpacity className="mt-3 self-start flex-row items-center rounded-full bg-primary-light px-2.5 py-1.5" onPress={() => void toggleReplySpeech(message)} activeOpacity={0.7}><MaterialIcons name={speakingMessageId === message.id ? "stop-circle" : "volume-up"} size={16} color="#6D5EF6" /><Text className="ml-1 text-xs font-semibold text-primary">{speakingMessageId === message.id ? "Stop" : "Listen"}</Text></TouchableOpacity> : null}</View></View>}
+          renderItem={renderMessage}
           ListFooterComponent={isWorking ? <View className="mb-4 items-start"><View className="flex-row items-center rounded-3xl border border-border bg-surface px-4 py-3"><ActivityIndicator size="small" color="#6D5EF6" /><Text className="ml-2 text-sm font-medium text-muted">OmniMind is working…</Text></View></View> : null}
         />
 

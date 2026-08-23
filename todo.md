@@ -34,3 +34,5 @@
 - [x] Add guided quick actions for writing, rewriting, translating, summarizing, brainstorming, study support, and marketing copy.
 - [x] Add basic text-to-speech playback for OmniMind assistant replies.
 - [x] Validate the added quick tools and reply playback controls.
+- [x] Add flashcard-set generation from assistant responses with local review and sharing controls.
+- [x] Validate the flashcard learning flow.

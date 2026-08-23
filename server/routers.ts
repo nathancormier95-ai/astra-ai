@@ -29,6 +29,20 @@ const legacyChatSchema = z.object({
   modeSystemPrompt: z.string().trim().min(20).max(1_500),
   messages: z.array(messageSchema).min(1).max(16),
 });
+const flashcardSchema = z.object({ question: z.string().min(1).max(240), answer: z.string().min(1).max(500) });
+const flashcardOutputSchema = {
+  type: "json_schema" as const,
+  json_schema: {
+    name: "omnimind_flashcards",
+    strict: true,
+    schema: {
+      type: "object",
+      properties: { cards: { type: "array", minItems: 3, maxItems: 8, items: { type: "object", properties: { question: { type: "string" }, answer: { type: "string" } }, required: ["question", "answer"], additionalProperties: false } } },
+      required: ["cards"],
+      additionalProperties: false,
+    },
+  },
+};
 const legacyChatAttempts = new Map<string, { count: number; windowStartedAt: number }>();
 
 function requireUsage(usage: { allowed: boolean; action: string; actions: Record<string, { limit: number }> }) {
@@ -123,6 +137,26 @@ export const appRouter = router({
         }
         await db.recordUsage(ctx.user.id, "chat");
         return { content: content.trim() };
+      }),
+    flashcards: protectedProcedure
+      .input(z.object({ source: z.string().trim().min(80).max(8_000) }))
+      .mutation(async ({ ctx, input }) => {
+        const usage = await db.canUseFeature(ctx.user.id, "chat");
+        requireUsage(usage);
+        const response = await invokeLLM({
+          model: "gpt-5-mini",
+          maxTokens: 900,
+          response_format: flashcardOutputSchema,
+          messages: [
+            { role: "system", content: "Create 3 to 8 high-quality study flashcards from the provided source. Each question must test a useful distinct idea. Each answer must be concise, accurate, and self-contained. Return only the required JSON object." },
+            { role: "user", content: input.source },
+          ],
+        });
+        const content = response.choices[0]?.message?.content;
+        if (!content || typeof content !== "string") throw new Error("OmniMind could not create flashcards from that response.");
+        const parsed = z.object({ cards: z.array(flashcardSchema).min(3).max(8) }).parse(JSON.parse(content));
+        await db.recordUsage(ctx.user.id, "chat");
+        return parsed;
       }),
     documentQuestion: protectedProcedure
       .input(z.object({ documentId: z.string().uuid(), question: z.string().trim().min(1).max(3_000), modelId: modelIdSchema.default("gpt-5-mini") }))
