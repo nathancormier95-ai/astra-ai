@@ -188,6 +188,15 @@ export default function AccountScreen() {
             <View className="flex-row items-baseline justify-between"><Text className="text-xl font-bold text-foreground">{billingPlanQuery.data ? `$${(billingPlanQuery.data.amountCents / 100).toFixed(0)}` : "$6"}<Text className="text-sm font-medium text-muted"> / month</Text></Text><Text className="text-xs font-semibold text-primary">Cancel anytime</Text></View>
             <Text className="mt-2 text-xs leading-4 text-muted">Payment details are collected by Stripe’s hosted checkout. OmniMind does not store your card details.</Text>
           </View>
+          {plan !== "premium" ? (
+            <View className="mt-4 rounded-2xl border border-border bg-background px-4 py-3">
+              <Text className="mb-3 text-sm font-bold text-foreground">Everything in Free, plus:</Text>
+              <View className="mb-2 flex-row items-center"><MaterialIcons name="check-circle" size={18} color="#2CB67D" /><Text className="ml-2 flex-1 text-sm text-foreground">300 AI chats each month</Text></View>
+              <View className="mb-2 flex-row items-center"><MaterialIcons name="check-circle" size={18} color="#2CB67D" /><Text className="ml-2 flex-1 text-sm text-foreground">30 image generations each month</Text></View>
+              <View className="mb-2 flex-row items-center"><MaterialIcons name="check-circle" size={18} color="#2CB67D" /><Text className="ml-2 flex-1 text-sm text-foreground">50 document questions and 100 voice inputs</Text></View>
+              <View className="flex-row items-center"><MaterialIcons name="check-circle" size={18} color="#2CB67D" /><Text className="ml-2 flex-1 text-sm text-foreground">Reason and Visual model access</Text></View>
+            </View>
+          ) : null}
           {plan === "premium" ? (
             <TouchableOpacity className="mt-4 items-center rounded-full border border-primary py-3" onPress={() => void openBillingPortal()} activeOpacity={0.75}><Text className="font-semibold text-primary">Manage subscription</Text></TouchableOpacity>
           ) : (

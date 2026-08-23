@@ -30,3 +30,4 @@
 - [ ] Validate connected-account authorization, ownership enforcement, and scan privacy boundaries.
 - [x] Restore a clear sign-in path for legacy chat clients and replace generic chat failures with actionable error messages.
 - [x] Make the Stripe-backed Subscribe for $6/month action prominent and explicit in the OmniMind account experience.
+- [x] Add a clear Premium feature list immediately above the $6/month Subscribe action.
