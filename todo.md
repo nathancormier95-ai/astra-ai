@@ -40,3 +40,4 @@
 - [ ] Add mobile controls to save generated flashcards and review saved project flashcard sets.
 - [ ] Validate project flashcard persistence and ownership boundaries.
 - [x] Diagnose and fix the Android startup crash reported for OmniMind version 1.05.
+- [x] Upgrade Expo dependencies and configuration to resolve the Android build requirement.
