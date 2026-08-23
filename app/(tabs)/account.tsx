@@ -191,7 +191,7 @@ export default function AccountScreen() {
           {plan === "premium" ? (
             <TouchableOpacity className="mt-4 items-center rounded-full border border-primary py-3" onPress={() => void openBillingPortal()} activeOpacity={0.75}><Text className="font-semibold text-primary">Manage subscription</Text></TouchableOpacity>
           ) : (
-            <TouchableOpacity className="mt-4 items-center rounded-full bg-primary py-3" onPress={() => void openCheckout()} activeOpacity={0.75}><Text className="font-semibold text-white">Upgrade to Premium</Text></TouchableOpacity>
+            <TouchableOpacity className="mt-4 items-center rounded-full bg-primary py-3" onPress={() => void openCheckout()} activeOpacity={0.75}><Text className="font-semibold text-white">Subscribe for $6/month</Text></TouchableOpacity>
           )}
         </View>
 

@@ -29,3 +29,4 @@
 - [ ] Build account screens for opt-in email and social scans with clear results and no background monitoring.
 - [ ] Validate connected-account authorization, ownership enforcement, and scan privacy boundaries.
 - [x] Restore a clear sign-in path for legacy chat clients and replace generic chat failures with actionable error messages.
+- [x] Make the Stripe-backed Subscribe for $6/month action prominent and explicit in the OmniMind account experience.
