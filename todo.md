@@ -41,3 +41,6 @@
 - [ ] Validate project flashcard persistence and ownership boundaries.
 - [x] Diagnose and fix the Android startup crash reported for OmniMind version 1.05.
 - [x] Upgrade Expo dependencies and configuration to resolve the Android build requirement.
+- [ ] Assess and prepare a bare React Native Android migration that removes the managed Expo build dependency.
+- [x] Assess the Flutter toolchain and create a staged Flutter Android rewrite for OmniMind’s core experience.
+- [x] Create a Flutter migration handoff package covering OmniMind screens, APIs, data models, assets, and native replacements.
