@@ -1,6 +1,6 @@
 # Codemagic Android Debug Build for OmniMind Flutter
 
-This package includes a **manual-only Codemagic template** at `flutter_handoff/codemagic.yaml`. It creates an installable Android **debug APK** after the Flutter client exists. It deliberately does not trigger from every commit, publish to Google Play, or include any secret. The current Expo client remains untouched and is still the fallback while the Flutter rewrite is underway.
+The repository root now includes a **manual-only Codemagic workflow** at `codemagic.yaml`. It expects the Flutter client at `omnimind-flutter/` and creates an installable Android **debug APK** after that client exists. It deliberately does not trigger from every commit, publish to Google Play, or include any secret. The current Expo client remains untouched and is still the fallback while the Flutter rewrite is underway.
 
 > Codemagic requires a `codemagic.yaml` file to be committed at the repository root before it can use YAML workflow configuration. The debug workflow below follows Codemagic's documented Flutter build process: resolve packages, build a debug APK, then collect it as an artifact. [1] [2]
 
@@ -23,19 +23,13 @@ Do **not** copy `codemagic.yaml` into the root of the current Expo repository. T
 
 ### 2. Move the template to the Flutter repository root
 
-After the Flutter client has a `pubspec.yaml` and `android/` directory, copy this file:
+The root `codemagic.yaml` already targets this location:
 
 ```text
-flutter_handoff/codemagic.yaml
+omnimind-flutter/
 ```
 
-to this location in the Flutter project:
-
-```text
-codemagic.yaml
-```
-
-Commit and push it with the Flutter source. Codemagic detects root-level YAML configuration when you scan the selected branch. [1]
+Commit and push the generated Flutter project files. Codemagic detects the root-level YAML configuration when you scan the selected branch. The workflow deliberately stops with an explanatory message until both `omnimind-flutter/pubspec.yaml` and `omnimind-flutter/android/` exist. [1]
 
 ### 3. Connect the Flutter repository in Codemagic
 

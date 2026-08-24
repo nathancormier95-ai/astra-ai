@@ -47,3 +47,4 @@
 - [x] Create a detailed step-by-step local Flutter and Android environment setup guide for the OmniMind migration.
 - [x] Research and recommend free-tier cloud development environments for a phone-only Flutter workflow.
 - [x] Add a Flutter-ready Codemagic Android build configuration and usage instructions to the migration handoff.
+- [x] Add the Codemagic workflow at the repository root for discovery by Codemagic.

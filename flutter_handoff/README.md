@@ -91,7 +91,7 @@ lib/
 
 ## Codemagic Android Test Builds
 
-`codemagic.yaml` is supplied in this handoff package as a **template**, not at the current Expo repository root. After the Flutter client has been initialized with `flutter create .`, copy it to the root of the Flutter project and follow [`CODEMAGIC_SETUP.md`](./CODEMAGIC_SETUP.md). The first workflow is manual-only and produces a debug APK for Android phone testing. It intentionally excludes all secrets, Android release signing, Google Play publishing, and automatic build triggers.
+The repository root contains `codemagic.yaml`, which targets the future `omnimind-flutter/` client. Create that client with `flutter create .`, commit its generated Android files, and follow [`CODEMAGIC_SETUP.md`](./CODEMAGIC_SETUP.md). The first workflow is manual-only and produces a debug APK for Android phone testing. It intentionally excludes all secrets, Android release signing, Google Play publishing, and automatic build triggers.
 
 ## Acceptance Checklist
 

@@ -1,0 +1,61 @@
+# OmniMind Flutter Android workflow for Codemagic.
+#
+# This repository currently retains its Expo client as a fallback. The Flutter
+# client will live at ./omnimind-flutter after it is initialized with
+# `flutter create .`. Until then, this manual workflow exits with a clear
+# message instead of attempting to treat the Expo project as Flutter.
+#
+# The workflow creates a debug APK for test devices only. It does not publish
+# to Google Play and contains no Android signing, Stripe, OAuth, or AI secrets.
+
+workflows:
+  omnimind-android-debug:
+    name: OmniMind Flutter — Android debug APK
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      java: 17
+      vars:
+        # This is a public endpoint, not a secret. Keep credentials and other
+        # sensitive values only on the existing backend or in secure settings.
+        OMNIMIND_API_BASE_URL: "https://astraai-pnqxhfej.manus.space"
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - name: Confirm the Flutter migration client is available
+        script: |
+          if [ ! -f omnimind-flutter/pubspec.yaml ] || [ ! -d omnimind-flutter/android ]; then
+            echo "The Flutter client is not available at ./omnimind-flutter yet."
+            echo "Create it with: mkdir omnimind-flutter && cd omnimind-flutter && flutter create ."
+            exit 1
+          fi
+      - name: Verify Flutter project structure
+        working_directory: omnimind-flutter
+        script: flutter --version
+      - name: Configure Android local properties
+        working_directory: omnimind-flutter
+        script: |
+          printf "flutter.sdk=%s\nsdk.dir=%s\n" "$FLUTTER_ROOT" "$ANDROID_HOME" > android/local.properties
+      - name: Resolve Flutter packages
+        working_directory: omnimind-flutter
+        script: flutter pub get
+      - name: Verify formatting
+        working_directory: omnimind-flutter
+        script: dart format --output=none --set-exit-if-changed .
+      - name: Run static analysis
+        working_directory: omnimind-flutter
+        script: flutter analyze
+      - name: Run Flutter tests
+        working_directory: omnimind-flutter
+        script: flutter test
+      - name: Build installable Android debug APK
+        working_directory: omnimind-flutter
+        script: |
+          flutter build apk --debug \
+            --dart-define=OMNIMIND_API_BASE_URL="$OMNIMIND_API_BASE_URL"
+    artifacts:
+      - omnimind-flutter/build/**/outputs/apk/**/*.apk
+      - omnimind-flutter/build/**/outputs/**/mapping.txt
