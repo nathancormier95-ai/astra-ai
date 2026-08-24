@@ -29,7 +29,7 @@ The root `codemagic.yaml` already targets this location:
 omnimind-flutter/
 ```
 
-Commit and push the generated Flutter project files. Codemagic detects the root-level YAML configuration when you scan the selected branch. The workflow deliberately stops with an explanatory message until both `omnimind-flutter/pubspec.yaml` and `omnimind-flutter/android/` exist. [1]
+Commit and push the generated Flutter project files. Codemagic detects the root-level YAML configuration when you scan the selected branch. The root workflow checks that `omnimind-flutter/pubspec.yaml` exists and generates the missing Android platform directory during the first cloud build when needed. [1]
 
 ### 3. Connect the Flutter repository in Codemagic
 

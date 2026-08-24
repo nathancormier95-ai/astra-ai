@@ -1,9 +1,8 @@
 # OmniMind Flutter Android workflow for Codemagic.
 #
 # This repository currently retains its Expo client as a fallback. The Flutter
-# client will live at ./omnimind-flutter after it is initialized with
-# `flutter create .`. Until then, this manual workflow exits with a clear
-# message instead of attempting to treat the Expo project as Flutter.
+# client lives at ./omnimind-flutter. On the first build, Codemagic generates
+# its missing Android platform directory from the committed Flutter source.
 #
 # The workflow creates a debug APK for test devices only. It does not publish
 # to Google Play and contains no Android signing, Stripe, OAuth, or AI secrets.
@@ -25,13 +24,19 @@ workflows:
         - $HOME/.pub-cache
         - $HOME/.gradle/caches
     scripts:
-      - name: Confirm the Flutter migration client is available
+      - name: Confirm the Flutter migration source is available
         script: |
-          if [ ! -f omnimind-flutter/pubspec.yaml ] || [ ! -d omnimind-flutter/android ]; then
-            echo "The Flutter client is not available at ./omnimind-flutter yet."
-            echo "Create it with: mkdir omnimind-flutter && cd omnimind-flutter && flutter create ."
+          if [ ! -f omnimind-flutter/pubspec.yaml ]; then
+            echo "The Flutter source is not available at ./omnimind-flutter yet."
             exit 1
           fi
+      - name: Generate Android platform files when needed
+        working_directory: omnimind-flutter
+        script: |
+          if [ ! -d android ]; then
+            flutter create --platforms=android --org com.app .
+          fi
+          test -d android
       - name: Verify Flutter project structure
         working_directory: omnimind-flutter
         script: flutter --version

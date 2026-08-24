@@ -28,7 +28,7 @@ Set the generated Android application ID to `com.app.allinoneaiassistant`, retai
 
 ## Codemagic
 
-The repository root contains `../codemagic.yaml`. It expects this directory at `omnimind-flutter/`, runs checks, and generates a debug APK after the Android platform directory exists. It is intentionally manual-only and contains no secret or release-signing material.
+The repository root contains `../codemagic.yaml`. It expects this directory at `omnimind-flutter/`, generates the Android platform directory automatically on its first cloud build, then runs checks and creates a debug APK. It is intentionally manual-only and contains no secret or release-signing material. Generating and committing Android files locally remains recommended before the first production release.
 
 ## Security Boundary
 

@@ -50,3 +50,4 @@
 - [x] Add the Codemagic workflow at the repository root for discovery by Codemagic.
 - [x] Create the OmniMind Flutter starter workspace for platform generation and Codemagic builds.
 - [x] Commit and push the completed OmniMind Flutter starter workspace and Codemagic workflow updates.
+- [x] Repair Codemagic so it generates the Flutter Android platform layer on the first build.
