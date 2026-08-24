@@ -1,0 +1,51 @@
+# OmniMind Flutter Android build template for Codemagic.
+#
+# Do NOT put this file at the root of the current Expo repository yet.
+# First create the Flutter client and its android/ directory, then copy this
+# file to the root of that Flutter project (or adapt working_directory if the
+# Flutter project is placed in a subdirectory of the repository).
+#
+# This workflow is manual-only by design. It creates a debug APK suitable for
+# direct installation on an Android test device. It does not upload to Google
+# Play and it does not contain any signing, Stripe, OAuth, or AI credentials.
+
+workflows:
+  omnimind-android-debug:
+    name: OmniMind Flutter — Android debug APK
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      java: 17
+      vars:
+        # Public server URL only. Do not place API keys, Stripe secrets, or
+        # OAuth client secrets in this file or in Dart defines.
+        OMNIMIND_API_BASE_URL: "https://astraai-pnqxhfej.manus.space"
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+    scripts:
+      - name: Verify Flutter project structure
+        script: |
+          test -f pubspec.yaml
+          test -d android
+          flutter --version
+      - name: Configure Android local properties
+        script: |
+          printf "flutter.sdk=%s\nsdk.dir=%s\n" "$FLUTTER_ROOT" "$ANDROID_HOME" > android/local.properties
+      - name: Resolve Flutter packages
+        script: flutter pub get
+      - name: Verify formatting
+        script: dart format --output=none --set-exit-if-changed .
+      - name: Run static analysis
+        script: flutter analyze
+      - name: Run Flutter tests
+        script: flutter test
+      - name: Build installable Android debug APK
+        script: |
+          flutter build apk --debug \
+            --dart-define=OMNIMIND_API_BASE_URL="$OMNIMIND_API_BASE_URL"
+    artifacts:
+      - build/**/outputs/apk/**/*.apk
+      - build/**/outputs/**/mapping.txt

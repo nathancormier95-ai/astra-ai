@@ -46,3 +46,4 @@
 - [x] Create a Flutter migration handoff package covering OmniMind screens, APIs, data models, assets, and native replacements.
 - [x] Create a detailed step-by-step local Flutter and Android environment setup guide for the OmniMind migration.
 - [x] Research and recommend free-tier cloud development environments for a phone-only Flutter workflow.
+- [x] Add a Flutter-ready Codemagic Android build configuration and usage instructions to the migration handoff.
