@@ -1,0 +1,20 @@
+# Flutter and Dart tooling
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+build/
+
+# Generated native platform files are created with `flutter create .`.
+# Keep Android local properties and signing files local.
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# IDE and local environment files
+.idea/
+.vscode/
+.env
+.env.*
